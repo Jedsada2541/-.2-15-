@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ระบบสอบออนไลน์ ม.2 | การออกแบบและเทคโนโลยี</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">แบบทดสอบออนไลน์ · ไม่เก็บข้อมูล</p>
+        <h1>ข้อสอบ ม.2 การออกแบบและเทคโนโลยี</h1>
+        <p class="subtitle">กรอกชื่อและเลขประจำตัวก่อนเริ่มสอบ มีเวลาทำข้อสอบ 1 ชั่วโมง และระบบจะแสดงคะแนนทันทีเมื่อส่งคำตอบ</p>
+      </div>
+      <div class="hero-card">
+        <span class="hero-score">25</span>
+        <span>ข้อ</span>
+        <small>เวลา <b id="durationText">1 ชั่วโมง</b> · เกณฑ์ผ่าน <b id="passScoreText">15</b> คะแนน</small>
+      </div>
+    </header>
+
+    <main>
+      <section id="startScreen" class="panel active" aria-labelledby="startTitle">
+        <div class="section-heading">
+          <h2 id="startTitle">ข้อมูลผู้เข้าสอบ</h2>
+          <p>ระบบนี้ไม่ใช้ฐานข้อมูล ไม่ใช้ localStorage และไม่ส่งข้อมูลไปที่ใด</p>
+        </div>
+
+        <div id="lockedNotice" class="alert danger hidden">
+          <b>สถานะ:</b> นักเรียนสอบไม่ผ่าน ระบบล็อกการสอบซ้ำไว้ชั่วคราว ต้องให้ครูกรอกรหัสผ่านก่อนเริ่มสอบใหม่
+        </div>
+
+        <form id="studentForm" class="student-form" autocomplete="off">
+          <label>
+            <span>ชื่อ - สกุลนักเรียน</span>
+            <input id="studentName" type="text" placeholder="เช่น เด็กชายสมชาย ใจดี" required />
+          </label>
+          <label>
+            <span>เลขประจำตัวนักเรียน</span>
+            <input id="studentId" type="text" inputmode="numeric" placeholder="เช่น 12345" required />
+          </label>
+          <button id="startBtn" type="submit" class="btn primary">เริ่มทำข้อสอบ</button>
+        </form>
+
+        <div id="teacherUnlock" class="teacher-box hidden">
+          <h3>สำหรับครูผู้คุมสอบ</h3>
+          <p>กรอกรหัสผ่านเพื่อปลดล็อกให้นักเรียนสอบใหม่</p>
+          <div class="unlock-row">
+            <input id="teacherPassword" type="password" placeholder="รหัสผ่านครู" />
+            <button id="unlockBtn" type="button" class="btn warning">ปลดล็อก</button>
+          </div>
+          <p id="unlockMessage" class="small-message"></p>
+        </div>
+      </section>
+
+      <section id="examScreen" class="panel" aria-labelledby="examTitle">
+        <div class="exam-topbar">
+          <div>
+            <p class="eyebrow">กำลังทำข้อสอบ</p>
+            <h2 id="examTitle">แบบทดสอบ 25 ข้อ</h2>
+            <p id="examStudent" class="muted"></p>
+          </div>
+          <div class="topbar-metrics">
+            <div id="timerCard" class="timer-card" aria-live="polite">
+              <span id="timeLeft">60:00</span>
+              <small>เวลาคงเหลือ</small>
+            </div>
+            <div class="progress-card">
+              <span id="answeredCount">0</span>/<span id="totalCount">25</span>
+              <small>ตอบแล้ว</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <form id="examForm" class="questions"></form>
+
+        <div class="sticky-actions">
+          <div>
+            <div id="unansweredWarning" class="warning-text"></div>
+            <div id="timerWarning" class="timer-warning"></div>
+          </div>
+          <button id="submitExamBtn" type="button" class="btn success">ส่งคำตอบก่อนเวลาและดูคะแนน</button>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="panel" aria-labelledby="resultTitle">
+        <div id="resultCard" class="result-card">
+          <p class="eyebrow">ผลการสอบ</p>
+          <h2 id="resultTitle">คะแนนของคุณ</h2>
+          <div class="result-grid">
+            <div>
+              <span class="label">ชื่อผู้สอบ</span>
+              <strong id="resultName">-</strong>
+            </div>
+            <div>
+              <span class="label">เลขประจำตัว</span>
+              <strong id="resultStudentId">-</strong>
+            </div>
+            <div>
+              <span class="label">คะแนนที่ได้</span>
+              <strong id="resultScore" class="big-score">0/25</strong>
+            </div>
+            <div>
+              <span class="label">ผลการประเมิน</span>
+              <strong id="resultStatus">-</strong>
+            </div>
+          </div>
+          <p id="resultAdvice" class="result-advice"></p>
+        </div>
+
+        <div class="result-actions">
+          <button id="printResultBtn" type="button" class="btn secondary">พิมพ์ผลคะแนน</button>
+          <button id="nextStudentBtn" type="button" class="btn primary hidden">เริ่มสอบนักเรียนคนถัดไป</button>
+        </div>
+
+        <div id="failUnlock" class="teacher-box hidden">
+          <h3>ปลดล็อกการสอบซ้ำ</h3>
+          <p>นักเรียนยังไม่ผ่าน ต้องให้ครูกรอกรหัสผ่านก่อนจึงจะสอบใหม่ได้</p>
+          <div class="unlock-row">
+            <input id="failTeacherPassword" type="password" placeholder="รหัสผ่านครู" />
+            <button id="failUnlockBtn" type="button" class="btn warning">ปลดล็อกสอบใหม่</button>
+          </div>
+          <p id="failUnlockMessage" class="small-message"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Static Website พร้อม Deploy บน Netlify / Vercel</span>
+      <span>ไม่มีระบบ Login · ไม่มีฐานข้อมูล · ไม่บันทึกข้อมูล</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
